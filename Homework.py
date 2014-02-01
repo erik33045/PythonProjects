@@ -1,3 +1,19 @@
+def sentence_stats():
+    word_list = list(raw_input("Enter Sentence:").split())
+    word_count, vowel_count, consonant_count = len(word_list), 0, 0
+
+    for word in word_list:
+        for letter in word:
+            if ord(letter) in [65, 69, 73, 79, 85, 97, 101, 105, 111, 117]:
+                vowel_count += 1
+            elif 65 <= ord(letter) <= 122:
+                consonant_count += 1
+
+    print "word count: {0}".format(word_count)
+    print "vowel count: {0}".format(vowel_count)
+    print "consonant count: {0}".format(consonant_count)
+
+
 def name_track():
     number_of_names = int(raw_input("Enter total number of names: "))
     number_of_mistakes = 0
