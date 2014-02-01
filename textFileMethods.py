@@ -15,14 +15,12 @@ def create_text_file():
     """Function which prompts for a file name, attempts to open that file, then writes text inputted by the user"""
     fname = raw_input('Enter filename: ')
 
-    # attempt to create file
     try:
         if os.path.exists(fname):
             raise NameError("'%s' File Already Exists." % fname)
     except NameError, e:
         print "ERROR: ", e
 
-    # get file content (text) lines
     input_data = []
     print "\nEnter lines ('.' by itself to quit).\n"
 
@@ -94,11 +92,20 @@ def rotate_word(s, i):
     print rotated_word
 
 
-if __name__ == '__main__':
-    eval_loop()
+def fib(number):
+    a, b = 0, 1
+    for i in range(0, number):
+        a, b = b, a + b
+    return a
+
+
+if '__main__' == __name__:
+    while True:
+        n = int(raw_input("Enter a positive integer: "))
+        print "The Fibonacci number is: ", fib(n)
 
     while True:
-        entry = raw_input('(r)ead, (c)reate, or (q)uit: ')
+        entry = raw_input("(r)ead, (c)reate, or (q)uit: ")
         if entry.lower() == "q":
             break
         elif entry.lower() == "r":
