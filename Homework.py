@@ -1,3 +1,7 @@
+def universal_extractor():
+    print "x"
+
+
 def sentence_stats():
     word_list = list(raw_input("Enter Sentence:").split())
     word_count, vowel_count, consonant_count = len(word_list), 0, 0

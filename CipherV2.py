@@ -17,11 +17,21 @@ def encrypt_message(message, key_table):
     """message is a set of alphabetic characters with no spaces
        key_table is the generated table from the earlier function
        return is the encrypted message"""
-    return ''.join([key_table[ord(letter) - 65] for letter in message.upper()].__reversed__())
+    upper_message = "".join(message.upper()[::-1].split())
+    return ''.join([key_table[ord(letter) - 65] for letter in upper_message])
 
 
 def decrypt_message(message, key_table):
     """message is a set of alphabetic characters with no spaces
        key_table is the generated table from the earlier function
        return is the decrypted message"""
-    return ''.join([chr(key_table.index(letter) + 65) for letter in message.upper()].__reversed__())
+    upper_message = "".join(message.upper()[::-1].split())
+    return ''.join([chr(key_table.index(letter) + 65) for letter in upper_message])
+
+
+if '__main__' == __name__:
+    key_table = create_key_table("KRYPTO")
+    message = encrypt_message("The quick brown fox jumps over the lazy dog", key_table)
+    print message
+    output = decrypt_message(message, key_table)
+    print output
