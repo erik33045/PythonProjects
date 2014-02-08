@@ -1,7 +1,3 @@
-def universal_extractor():
-    print "x"
-
-
 def sentence_stats():
     word_list = list(raw_input("Enter Sentence:").split())
     word_count, vowel_count, consonant_count = len(word_list), 0, 0
@@ -51,68 +47,6 @@ def print_error(error_message, number_of_mistakes, auto_correct):
         print "You have made {0} mistakes, try again.".format("string", number_of_mistakes + 1)
 
 
-def reverse_sentence():
-    input_string = raw_input("Enter a Sentence: ")
-    print ' '.join(reversed(input_string.split()))
-
-
-def create_dictionary(int_list, string_list):
-    print str(dict(zip(int_list, string_list)))
-
-
-def input_information():
-    food_dictionary = {}
-    while True:
-        name = raw_input("Name: ")
-        if name == "":
-            break
-        food = raw_input("Food: ")
-        if name in food_dictionary:
-            food_dictionary[name].append(food)
-        else:
-            food_dictionary[name] = [food]
-    return food_dictionary
-
-
-def print_favorite_foods(food_dictionary):
-    for name in food_dictionary:
-        print name, " likes ",
-        if len(food_dictionary[name]) == 1:
-            print food_dictionary[name][0]
-        else:
-            print ', '.join(food_dictionary[name][:-1]) + " and " + food_dictionary[name][-1]
-        print " "
-
-
-def favorite_foods():
-    print_favorite_foods(input_information())
-
-
-def half_backwards(input_list):
-    n = len(input_list) / 2
-    return input_list[n:] + input_list[:n]
-
-
-def one_to_one(d):
-    return len(d.keys()) == len(set(d.values()))
-
-
-def is_prefix_atom(l, a):
-    return not [b for b in l if a.startswith(b) and a != b]
-
-
-def prefix_atoms(l):
-    return [a for a in l if is_prefix_atom(l, a)]
-
-
-def is_prefix_dictionary(l):
-    l.sort(key=len)
-    d = {}
-    [add_to_dictionary(d, a, l) for a in l if is_prefix_atom(l, a)]
-
-    for item in d.items():
-        print item[0] + " : " + str(item[1]),
-
-
-def add_to_dictionary(d, a, l):
-    d[a] = [b for b in l if b.startswith(a)]
+if '__main__' == __name__:
+    sentence_stats()
+    name_track()
