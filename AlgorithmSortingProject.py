@@ -13,18 +13,24 @@ class TeamStats:
         elif scored > suffered:
             self.points += 3
 
-    def print_final_output(self, total_earned_points):
+    def print_final_output(self):
         #position, name, points, games played, scored goals, suffered goals, goal difference, % of earned points
         return str(self.position) + ". " + self.name + " " + str(self.points) + " " + str(self.games_played) + " " + \
                str(self.scored_goals) + " " + \
                str(self.suffered_goals) + " " + str(self.goal_difference()) + " " + \
-               str(self.calculate_percentage_of_earned_points(total_earned_points))
+               str(self.calculate_percentage_of_earned_points())
 
     def goal_difference(self):
         return self.scored_goals - self.suffered_goals
 
-    def calculate_percentage_of_earned_points(self, total_points):
-        return "%.2f" % (float(self.points / total_points) * 100)
+    def calculate_percentage_of_earned_points(self):
+        percentage = 0
+        if self.games_played != 0:
+            percentage = float(self.points) / float(self.games_played * 3)
+        else:
+            percentage = 1
+        answer = percentage * 100
+        return "%.2f" % answer
 
     name = ""
     games_played = 0
@@ -35,15 +41,15 @@ class TeamStats:
     points = 0
 
 
-def process_game(game, team_dictionary):
-    first_team = team_dictionary[game[0]]
+def process_game(game, team_list):
+    first_team = [team for team in team_list if team.name == game[0]][0]
     first_team.process_game(int(game[1]), int(game[3]))
-    second_team = team_dictionary[game[4]]
+    second_team = [team for team in team_list if team.name == game[4]][0]
     second_team.process_game(int(game[3]), int(game[1]))
 
 
-def add_team_to_dictionary(team_name, dictionary, order):
-    dictionary[team_name] = TeamStats(team_name, order)
+def add_team_to_list(team_name, team_list, order):
+    team_list.append(TeamStats(team_name, order))
 
 
 def determine_position_of_teams(team_list):
@@ -55,10 +61,26 @@ def determine_position_of_teams(team_list):
             previous_team = team_list[i - 2]
             if team.points != previous_team.points \
                 or team.scored_goals != previous_team.scored_goals \
-                or team.goal_difference() != previous_team.goal_difference():
+                    or team.goal_difference() != previous_team.goal_difference():
                 position = i
 
         team.position = position
+
+
+def team_sort_comparison(x, y):
+    points = y.points - x.points
+    if points == 0:
+        goal_difference = y.goal_difference() - x.goal_difference()
+        if goal_difference == 0:
+            scored_goals = y.scored_goals - x.scored_goals
+            if scored_goals == 0:
+                return x.order_added - y.order_added
+            else:
+                return scored_goals
+        else:
+            return goal_difference
+    else:
+        return points
 
 
 def process_dataset(input_file, output_file, is_first_dataset):
@@ -67,21 +89,17 @@ def process_dataset(input_file, output_file, is_first_dataset):
     number_of_teams, number_of_games = int(teams_and_games[0]), int(teams_and_games[1])
 
     #Add Teams
-    team_dictionary = {}
-    [add_team_to_dictionary(input_file.readline().strip(), team_dictionary, x + 1) for x in range(number_of_teams)]
+    team_list = []
+    [team_list.append(TeamStats(input_file.readline().strip(), x+1)) for x in range(number_of_teams)]
 
     #Process Game Stats
-    [process_game(input_file.readline().split(), team_dictionary) for x in range(number_of_games)]
+    [process_game(input_file.readline().split(), team_list) for x in range(number_of_games)]
 
-    #Turn the dictionary into a list and then sort on the function provided by the class
-    team_list = [value for key, value in team_dictionary.items()]
-    team_list.sort(key=lambda i: (-i.points, -i.goal_difference(), -i.scored_goals, i.order_added,))
+    #sort the list based on the comparison function
+    team_list.sort(cmp=team_sort_comparison)
 
     #Now that the list has been sorted, fill in the final positions
     determine_position_of_teams(team_list)
-
-    #Get the total amount of points earned so the percentage can be calculated for each team
-    total_earned_points = sum([team.points for team in team_list])
 
     #This is so we don't write a null as the first line in the output file
     if not is_first_dataset:
@@ -91,7 +109,7 @@ def process_dataset(input_file, output_file, is_first_dataset):
     output_file.write(str(len(team_list)) + '\n')
 
     #Write each team to the output file
-    [output_file.write(str(team.print_final_output(total_earned_points)) + '\n') for team in team_list]
+    [output_file.write(str(team.print_final_output()) + '\n') for team in team_list]
 
     #Move the file header in place to read the next team
     input_file.readline()
@@ -111,5 +129,9 @@ def algorithm_sorting_project():
         process_dataset(input_file, output_file, is_first_dataset)
         is_first_dataset = False
 
-    #Close the file
+    #Close the files
+    input_file.close()
     output_file.close()
+
+if __name__ == '__main__':
+    algorithm_sorting_project()
