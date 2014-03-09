@@ -1,4 +1,3 @@
-# noinspection PyUnresolvedReferences
 import cProfile
 # noinspection PyUnresolvedReferences
 import AlgorithmsDynamicProgrammingProject
