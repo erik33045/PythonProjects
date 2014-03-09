@@ -21,7 +21,7 @@ def do_most_work(job_array, current_week, work_on_last_week):
         if work_on_last_week:
             return max(max_previous_work + low_value, max_previous_no_work + high_value)
         else:
-            return max(max_previous_no_work, max_previous_work)
+            return max_previous_work #because it will always be greater than max_previous_no_work
 
 
 def dynamic_programming():
