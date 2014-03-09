@@ -60,7 +60,6 @@ do_most_work(int job_array[][], int number_of_weeks){
 		reconstruct_path(LOW, number_of_weeks)
 
 reconstruct_path(int step, int week)
-	
 	if( week == 1 ) 
 		print step + '\n';
 		return;
