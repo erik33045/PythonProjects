@@ -36,83 +36,112 @@ def print_tables(value_table):
 
 # noinspection PyPep8Naming
 def do_most_work(job_array, number_of_weeks, output_file):
+    """do_most_work
+        input:
+            job_array: a 2-D array to hold the high and low earnings for each week
+            number_of_weeks: number of weeks to schedule work
+            output_file
+        output:
+            print the largest possible value of total earning for all weeks.
+            print the sequence of no work, high stress work, and low stress work schedule
+                that gives the optimal total earnings for all weeks
+
+        Time complexity: O(n)
+    """
+
+    #Constants created for indexing
     LOW = 0
     HIGH = 1
     NOTHING = 2
-    value_table = []
+    value_table = []    #Dynamic array that holds intermediate values for schedule sequences
+    parent_table = []   #Array to hold sequence of steps to achieve optimal solution
 
+    if number_of_weeks == 0: #no weeks to schedule: output 0
+        output_file.write(str(0))
+        return
+
+    #initialize dynamic programming intermediate value table with 0's
     for i_iterator in range(number_of_weeks+1):
         value_table.append([])
         for j_iterator in range(3):
-            value_table[i_iterator].append(Cell())
+            value_table[i_iterator].append(0)
 
-    if number_of_weeks == 0:
-        return 0
-
-    for y in range(LOW, NOTHING+1):
-        value_table[0][y].val = 0
-        value_table[0][y].parent = NOTHING
-        value_table[1][y].parent = NOTHING
-
-    for y in range(1, number_of_weeks+1):
-        value_table[y][HIGH].parent = NOTHING
-
+    #Fill value table in row major order by week
     for x in range(1, number_of_weeks+1):
         l_val = int(job_array[LOW][x])
         h_val = int(job_array[HIGH][x])
-        prev_l = value_table[x - 1][LOW].val
-        prev_h = value_table[x - 1][HIGH].val
-        prev_n = value_table[x - 1][NOTHING].val
+        prev_l = value_table[x - 1][LOW]
+        prev_h = value_table[x - 1][HIGH]
+        prev_n = value_table[x - 1][NOTHING]
 
-        value_table[x][HIGH].val = prev_n + h_val
+        #For HIGH value choice column. Take previous NOTHING value and add with current week high-stress job  earnings
+        value_table[x][HIGH] = prev_n + h_val
 
+        #If we choose to do a low-stress job or no job at all, we must use the best of the previous weeks values
         if prev_h > prev_l:
-            value_table[x][LOW].val = prev_h + l_val
-            value_table[x][LOW].parent = HIGH
-
-            value_table[x][NOTHING].val = prev_h
-            value_table[x][NOTHING].parent = HIGH
-
+            #If HIGH value was the best choice of the previous week's possible outcomes, then use HIGH as the parent
+            #   and add that high value to this weeks low-stress earnings
+            value_table[x][LOW] = prev_h + l_val
+            #If we do nothing in this current week we also choose the best outcome of the previous week
+            #Note: The NOTHING and LOW options will always use the same value from the previous week as a basis for the
+            # current week
+            value_table[x][NOTHING] = prev_h
+            #since HIGH was used as a basis for the current week values, we add HIGH as a step on the parent array
+            parent_table.append(HIGH)
         else:
-            value_table[x][LOW].val = prev_l + l_val
-            value_table[x][LOW].parent = LOW
-            value_table[x][NOTHING].val = prev_l
-            value_table[x][NOTHING].parent = LOW
+            #similar reasoning as the if body except with LOW
+            value_table[x][LOW] = prev_l + l_val
+            value_table[x][NOTHING] = prev_l
+            parent_table.append(LOW)
 
-    low_final = value_table[number_of_weeks][LOW].val
-    high_final = value_table[number_of_weeks][HIGH].val
+    #get the final low and high values to compare to choose the greatest value
+    low_final = value_table[number_of_weeks][LOW]
+    high_final = value_table[number_of_weeks][HIGH]
 
     #Debug info, allows us to see the traceback and parent tables
     #print_tables(value_table)
 
+    #Output the optimal value and use the parent table to print the appropriate path
     if high_final > low_final:
         output_file.write(str(high_final) + '\n')
-        output_file.write(reconstruct_path(value_table, HIGH, number_of_weeks) + '\n')
+        parent_table.append(HIGH)
+        output_file.write(reconstruct_path(parent_table, number_of_weeks) + '\n')
     else:
         output_file.write(str(low_final) + '\n')
-        output_file.write(reconstruct_path(value_table, LOW, number_of_weeks) + '\n')
+        parent_table.append(LOW)
+        output_file.write(reconstruct_path(parent_table, number_of_weeks) + '\n')
 
 
 # noinspection PyPep8Naming
-def reconstruct_path(value_table, step, week):
+def reconstruct_path(parent_table, week):
+    ''' reconstruct_path: takes the parent table and recursively prints the path for the optimal job scheduling for
+        a number of weeks
+            Time Complexity: O(n)
+    '''
     LOW = 0
     HIGH = 1
     NOTHING = 2
 
     return_string = ""
 
+    step = parent_table[week]
+
     if step == LOW:
+        # if week == 1 then it is the beginning of the weeks so there are no more steps to process. Simply add
+        # appropriate output and return.
         if week != 1:
-            return_string += reconstruct_path(value_table, value_table[week][LOW].parent, week - 1)
+            return_string += reconstruct_path(parent_table, week - 1)
         return_string += 'L' + ' '
     elif step == HIGH:
-        if week != 1:
-            return_string += reconstruct_path(value_table, value_table[week][HIGH].parent, week - 1)
+        #if step is high then we know the previous week must be NOTHING.
+        # if week == 2 then we only want to print the accompanying NOTHING and the HIGH
+        # if week == 1 then we are at the beginning and do not want to print the accompanying NOTHING
+        # if week > 2 then there are wees before NOTHING and HIGH so we must continue to recurse
+        if week > 2:
+            return_string += reconstruct_path(parent_table, week - 2)
+        if week > 1:
+            return_string += 'N' + ' '
         return_string += 'H' + ' '
-    elif step == NOTHING:
-        if week != 1:
-            return_string += reconstruct_path(value_table, value_table[week][NOTHING].parent, week - 1)
-        return_string += 'N' + ' '
     return return_string
 
 
