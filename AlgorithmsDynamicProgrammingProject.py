@@ -105,11 +105,10 @@ def do_most_work(job_array, number_of_weeks, output_file):
     if high_final > low_final:
         output_file.write(str(high_final) + '\n')
         parent_table.append(HIGH)
-        output_file.write(reconstruct_path(parent_table, number_of_weeks) + '\n')
     else:
         output_file.write(str(low_final) + '\n')
         parent_table.append(LOW)
-        output_file.write(reconstruct_path(parent_table, number_of_weeks) + '\n')
+    output_file.write(reconstruct_path(parent_table, number_of_weeks) + '\n')
 
 
 # noinspection PyPep8Naming
@@ -163,7 +162,7 @@ def process_case(input_file, output_file):
 
 def dynamic_programming():
     #Open the files
-    input_file = open("input.txt", 'r')
+    input_file = open("input2.txt", 'r')
     output_file = open("Hendrickson.txt", 'wb')
 
     #Read the number of expected datasets and place the file header in the correct place
