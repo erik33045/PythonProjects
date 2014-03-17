@@ -142,7 +142,7 @@ def reconstruct_path(parent_table, week):
 
     return return_string[::-1].strip()
 # noinspection PyPep8Naming
-'''def reconstruct_path(parent_table, week):
+'''def reconstruct_path(parent_table, week)
      # reconstruct_path: takes the parent table and recursively prints the path for the optimal job scheduling for
       #  a number of weeks.
       #      Time Complexity: O(n)
