@@ -110,13 +110,43 @@ def do_most_work(job_array, number_of_weeks, output_file):
         parent_table.append(LOW)
     output_file.write(reconstruct_path(parent_table, number_of_weeks) + '\n')
 
-
-# noinspection PyPep8Naming
 def reconstruct_path(parent_table, week):
     ''' reconstruct_path: takes the parent table and recursively prints the path for the optimal job scheduling for
         a number of weeks
             Time Complexity: O(n)
     '''
+    print "Reconstructing"
+    LOW = 0
+    HIGH = 1
+    NOTHING = 2
+
+    return_string = ""
+    next_week_nothing = False
+
+    while(week):
+        step = parent_table[week]
+
+        if next_week_nothing:
+            return_string += 'N' + ' '
+            next_week_nothing = False
+
+        elif step == LOW:
+            return_string += 'L' + ' '
+
+        elif step == HIGH:
+            return_string += 'H' + ' '
+            next_week_nothing = True
+        week -= 1
+
+    print return_string[::-1].strip()
+
+    return return_string[::-1].strip()
+# noinspection PyPep8Naming
+'''def reconstruct_path(parent_table, week):
+     # reconstruct_path: takes the parent table and recursively prints the path for the optimal job scheduling for
+      #  a number of weeks
+      #      Time Complexity: O(n)
+
     LOW = 0
     HIGH = 1
     NOTHING = 2
@@ -142,7 +172,7 @@ def reconstruct_path(parent_table, week):
             return_string += 'N' + ' '
         return_string += 'H' + ' '
     return return_string
-
+'''
 
 def process_case(input_file, output_file):
     number_of_weeks = int(input_file.readline())
