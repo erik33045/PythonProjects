@@ -115,32 +115,32 @@ def reconstruct_path(parent_table, week):
         a number of weeks
             Time Complexity: O(n)
     '''
-    print "Reconstructing"
+    
     LOW = 0
     HIGH = 1
     NOTHING = 2
 
     return_string = ""
-    next_week_nothing = False
+    prev_week_nothing = False # flag used to ensure that high weeks are always preceeded by none
 
+    # Reconstruct the path in reverse order starting with the last week
     while(week):
         step = parent_table[week]
 
-        if next_week_nothing:
+        if prev_week_nothing: # next week will be high, so this week is none
             return_string += 'N' + ' '
-            next_week_nothing = False
+            prev_week_nothing = False
 
         elif step == LOW:
             return_string += 'L' + ' '
 
         elif step == HIGH:
             return_string += 'H' + ' '
-            next_week_nothing = True
+            prev_week_nothing = True # enables the flag to mark the previous week as none
         week -= 1
 
-    print return_string[::-1].strip()
-
-    return return_string[::-1].strip()
+    return return_string[::-1].strip() # [::-1] reverses this string since we are reconstructin from the end
+    
 # noinspection PyPep8Naming
 '''def reconstruct_path(parent_table, week)
      # reconstruct_path: takes the parent table and recursively prints the path for the optimal job scheduling for
