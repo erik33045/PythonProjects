@@ -1,38 +1,3 @@
-class Cell:
-    def __init__(self):
-        pass
-
-    val = 0
-    parent = 0
-
-
-def do_most_work_recursive(job_array, current_week, work_on_last_week):
-    low_value = int(job_array[0][current_week])
-    high_value = int(job_array[1][current_week])
-
-    if current_week == -1:
-        return 0
-    else:
-        max_previous_no_work = do_most_work_recursive(job_array, current_week - 1, False)
-        max_previous_work = do_most_work_recursive(job_array, current_week - 1, True)
-        if work_on_last_week:
-            return max(max_previous_work + low_value, max_previous_no_work + high_value)
-        else:
-            return max_previous_work
-
-
-def print_tables(value_table):
-    for i in range(len(value_table)):
-        print ''
-        for j in range(len(value_table[i])):
-            print str(value_table[i][j].val) + ' ',
-    print ''
-    for i in range(len(value_table)):
-        print ''
-        for j in range(len(value_table[i])):
-            print str(value_table[i][j].parent) + ' ',
-    print ' \n'
-
 
 # noinspection PyPep8Naming
 def do_most_work(job_array, number_of_weeks, output_file):
@@ -141,38 +106,6 @@ def reconstruct_path(parent_table, week):
 
     return return_string[::-1].strip() # [::-1] reverses this string since we are reconstructin from the end
     
-# noinspection PyPep8Naming
-'''def reconstruct_path(parent_table, week)
-     # reconstruct_path: takes the parent table and recursively prints the path for the optimal job scheduling for
-      #  a number of weeks.
-      #      Time Complexity: O(n)
-
-    LOW = 0
-    HIGH = 1
-    NOTHING = 2
-
-    return_string = ""
-
-    step = parent_table[week]
-
-    if step == LOW:
-        # if week == 1 then it is the beginning of the weeks so there are no more steps to process. Simply add
-        # appropriate output and return.
-        if week != 1:
-            return_string += reconstruct_path(parent_table, week - 1)
-        return_string += 'L' + ' '
-    elif step == HIGH:
-        #if step is high then we know the previous week must be NOTHING.
-        # if week == 2 then we only want to print the accompanying NOTHING and the HIGH
-        # if week == 1 then we are at the beginning and do not want to print the accompanying NOTHING
-        # if week > 2 then there are wees before NOTHING and HIGH so we must continue to recurse
-        if week > 2:
-            return_string += reconstruct_path(parent_table, week - 2)
-        if week > 1:
-            return_string += 'N' + ' '
-        return_string += 'H' + ' '
-    return return_string
-'''
 
 def process_case(input_file, output_file):
     number_of_weeks = int(input_file.readline())
@@ -192,7 +125,7 @@ def process_case(input_file, output_file):
 
 def dynamic_programming():
     #Open the files
-    input_file = open("input2.txt", 'r')
+    input_file = open("input.txt", 'r')
     output_file = open("Hendrickson.txt", 'wb')
 
     #Read the number of expected datasets and place the file header in the correct place
