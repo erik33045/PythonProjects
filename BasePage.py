@@ -1,5 +1,6 @@
 import cProfile
 # noinspection PyUnresolvedReferences
 import AlgorithmsDynamicProgrammingProject
+import Steganography
 if '__main__' == __name__:
-    cProfile.run("AlgorithmsDynamicProgrammingProject.dynamic_programming()")
+    password = Steganography.get_password()
