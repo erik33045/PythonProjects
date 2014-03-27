@@ -75,6 +75,7 @@ def do_most_work(job_array, number_of_weeks, output_file):
         parent_table.append(LOW)
     output_file.write(reconstruct_path(parent_table, number_of_weeks) + '\n')
 
+
 def reconstruct_path(parent_table, week):
     ''' reconstruct_path: takes the parent table and recursively prints the path for the optimal job scheduling for
         a number of weeks
