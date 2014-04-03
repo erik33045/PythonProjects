@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 
 
 class Node:
+    x = 0
+    y = 0
     index = ""
     color = ""
     direction = "0"
@@ -26,12 +28,14 @@ class Node:
             self.color = "Y"
 
         self.index = index
+        self.x = float(index.split(',')[0])
+        self.y = -float(index.split(',')[1])
         self.edges = []
 
     # So if the compare node is the opposite color or the end, add it as an edge to the current node
     def can_add_compare_node_as_edge(self, compare_node):
-        return (self.color == "B" and (compare_node.color == "R" or compare_node.direction == "0")) or (
-            self.color == "R" and (compare_node.color == "B" or compare_node.direction == "0"))
+        return (self.color == "B" and (compare_node.color == "R" or compare_node.color == "Y")) or (
+            self.color == "R" and (compare_node.color == "B" or compare_node.color == "Y"))
 
     # Traverse through the node dictionary in the direction of the node and add all possible edges
     def add_edges_to_node(self, node_dictionary, number_of_columns, number_of_rows):
@@ -41,15 +45,15 @@ class Node:
             return
 
         position = self.index.split(',')
-        row_position = int(position[0]) + self.direction_vertical
-        column_position = int(position[1]) + self.direction_horizontal
+        row_position = int(position[1]) + self.direction_vertical
+        column_position = int(position[0]) + self.direction_horizontal
 
         # stay within the bounds of the array!
         while (0 <= row_position < number_of_rows) and (0 <= column_position < number_of_columns):
             # Change position based on the node's direction
 
             # Here is the node we are comparing against
-            compare_node = node_dictionary["" + str(row_position) + "," + str(column_position)]
+            compare_node = node_dictionary["" + str(column_position) + "," + str(row_position)]
 
             if self.can_add_compare_node_as_edge(compare_node):
                 self.edges.append(compare_node.index)
@@ -65,7 +69,7 @@ def create_node_dictionary(input_file, number_of_rows):
         column = 0
         nodes = input_file.readline().split()
         for node in nodes:
-            index = "" + str(row) + "," + str(column)
+            index = "" + str(column) + "," + str(row)
             node_to_add = Node(index, node.split('-'))
             node_dictionary[index] = node_to_add
             column += 1
@@ -74,13 +78,64 @@ def create_node_dictionary(input_file, number_of_rows):
     return node_dictionary
 
 
+def draw_graph(g, node_dictionary):
+    custom_labels = {}
+    custom_colors = {}
+    pos = {}
+    for index in node_dictionary.keys():
+        node = node_dictionary[index]
+        custom_labels[node.index] = node.direction
+        if node.index == "0,0":
+            custom_colors[node.index] = "g"
+        else:
+            custom_colors[node.index] = node.color.lower()
+        pos[node.index] = (node.x, node.y)
+    nx.draw(g, node_list=custom_labels.keys(),
+                     labels=custom_labels,
+                     node_color=custom_colors.values(), pos=pos)
+    plt.savefig("atlas.png", dpi=100)
+
+
+def create_shortest_path_string(shortest_path):
+    shortest_path_string = ""
+    for index in range(0, len(shortest_path) - 1):
+        if index + 1 > len(shortest_path) - 1:
+            return
+        else:
+            step = shortest_path[index]
+            next_step = shortest_path[index + 1]
+            change_horizontal = int(next_step.split(',')[0]) - int(step.split(',')[0])
+            change_vertical = int(next_step.split(',')[1]) - int(step.split(',')[1])
+
+            direction_change = ""
+
+            if change_vertical < 0:
+                direction_change += "N"
+            elif change_vertical > 0:
+                direction_change += "S"
+            if change_horizontal < 0:
+                direction_change += "W"
+            elif change_horizontal > 0:
+                direction_change += "E"
+
+            if direction_change == "N" or direction_change == "S":
+                direction_change += "-" + str(abs(change_vertical))
+            elif direction_change == "W" or direction_change == "E":
+                direction_change += "-" + str(abs(change_horizontal))
+            else:
+                direction_change += "-" + str(abs(change_horizontal))
+
+            shortest_path_string += direction_change + " "
+    return shortest_path_string
+
+
 def solve_maze():
     input_file = open("input.txt", 'r')
     output_file = open("Hendrickson.txt", 'wb')
 
     number_of_rows = number_of_columns = int(input_file.readline())
     node_dictionary = create_node_dictionary(input_file, number_of_rows)
-    max_index = "" + str(number_of_rows-1) + "," + str(number_of_columns-1)
+    max_index = "" + str(number_of_rows - 1) + "," + str(number_of_columns - 1)
 
     nodes = []
     edges = []
@@ -91,22 +146,15 @@ def solve_maze():
         for edge in node.edges:
             edges.append((index, edge))
 
-    custom_labels = {}
-    custom_colors = {}
-    for index in node_dictionary.keys():
-        node = node_dictionary[index]
-        custom_labels[node.index] = node.direction
-        custom_colors[node.index] = node.color.lower()
-
     g = nx.DiGraph()
     g.add_nodes_from(nodes)
     g.add_edges_from(edges)
 
-    shortest_path = nx.algorithms.shortest_paths.generic.shortest_path(g, source="0,0", target=max_index, weight=None)
-    nx.draw_graphviz(g, node_list=custom_labels.keys(),
-                     labels=custom_labels,
-                     node_color=custom_colors.values())
-    plt.savefig("atlas.png", dpi=100)
+    shortest_path = nx.algorithms.shortest_paths.generic.shortest_path(g, source="0,0", target=max_index)
+    print create_shortest_path_string(shortest_path)
+
+    draw_graph(g, node_dictionary)
+
     input_file.close()
     output_file.close()
 
