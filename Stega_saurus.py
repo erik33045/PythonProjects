@@ -1,4 +1,4 @@
-import Image
+from PIL import Image
 from getpass import getpass
 import hashlib
 import sys
