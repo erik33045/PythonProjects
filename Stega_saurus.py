@@ -86,7 +86,9 @@ def embed(source_file_path, target_file_path):
 
     #Encode the data into an image, then save it as a ping.
     image = encode_into_image(image, data_to_embed)
-    image.save(target_file_path[:-4] + "-secret.png", 'PNG')
+    new_file_name = target_file_path[:-4] + "-secret.png"
+    image.save(new_file_name, 'PNG')
+    print "File has been embeded into a file called {0}".format(new_file_name)
 
 
 def extract(file_path):
