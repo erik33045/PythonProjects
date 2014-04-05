@@ -78,22 +78,29 @@ def create_node_dictionary(input_file, number_of_rows):
     return node_dictionary
 
 
-def draw_graph(g, node_dictionary):
+def draw_graph(g, node_dictionary, file_name):
     custom_labels = {}
     custom_colors = {}
     pos = {}
     for index in node_dictionary.keys():
         node = node_dictionary[index]
         custom_labels[node.index] = node.direction
+
+        # Custom label and color the start node
         if node.index == "0,0":
+            custom_labels[node.index] = node.color + "-" + node.direction
             custom_colors[node.index] = "g"
         else:
             custom_colors[node.index] = node.color.lower()
+
+        # Mark the position
         pos[node.index] = (node.x, node.y)
+
     nx.draw(g, node_list=custom_labels.keys(),
-                     labels=custom_labels,
-                     node_color=custom_colors.values(), pos=pos)
-    plt.savefig("atlas.png", dpi=100)
+            labels=custom_labels,
+            node_color=custom_colors.values(), pos=pos)
+
+    plt.savefig(file_name, dpi=120)
 
 
 def create_shortest_path_string(shortest_path):
@@ -129,14 +136,10 @@ def create_shortest_path_string(shortest_path):
     return shortest_path_string
 
 
-def solve_maze():
-    input_file = open("input.txt", 'r')
-    output_file = open("Hendrickson.txt", 'wb')
-
+def solve_maze(input_file, output_file, maze_number):
     number_of_rows = number_of_columns = int(input_file.readline())
     node_dictionary = create_node_dictionary(input_file, number_of_rows)
     max_index = "" + str(number_of_rows - 1) + "," + str(number_of_columns - 1)
-
     nodes = []
     edges = []
     for index in node_dictionary.keys():
@@ -151,13 +154,32 @@ def solve_maze():
     g.add_edges_from(edges)
 
     shortest_path = nx.algorithms.shortest_paths.generic.shortest_path(g, source="0,0", target=max_index)
-    print create_shortest_path_string(shortest_path)
 
-    draw_graph(g, node_dictionary)
+    # write the output to the file
+    output_file.write(create_shortest_path_string(shortest_path) + "\n" + "\n")
+
+    # draw the graph and save it as a png
+    draw_graph(g, node_dictionary, "Hendrickson_" + str(maze_number + 1) + ".png")
+
+    # read blank line to get to correct place
+    input_file.readline()
+
+
+def main():
+    input_file = open("input.txt", 'r')
+    output_file = open("Hendrickson.txt", 'wb')
+
+    number_of_mazes = int(input_file.readline())
+
+    # read blank line to go to correct place in file
+    input_file.readline()
+
+    for maze in range(number_of_mazes):
+        solve_maze(input_file, output_file, maze)
 
     input_file.close()
     output_file.close()
 
 
 if __name__ == '__main__':
-    solve_maze()
+    main()
