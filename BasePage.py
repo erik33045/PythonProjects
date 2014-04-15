@@ -1,5 +1,7 @@
 # noinspection PyUnresolvedReferences
 import datetime
-import AlgorithmsGraphProject
+import AlgorithmsFinalProject
+
+
 if '__main__' == __name__:
-    AlgorithmsGraphProject.main()
+    AlgorithmsFinalProject.algorithms_final_project()
