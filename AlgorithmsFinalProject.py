@@ -1,10 +1,11 @@
 import networkx as nx
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 #randomization is a good factor to emply
 #Loop and do the problems multiple times, then select the best possible solution
 def algorithms_final_project():
+    import matplotlib.pyplot as plt
     #Open the files
     input_file = open("input.txt", 'r')
     output_file = open("Hendrickson.txt", 'wb')
@@ -54,7 +55,7 @@ def graph_generator(number_of_nodes, connectedness_of_graph, name_of_test_file):
 
 
 def adams_solution():
-    input_file = open('input.txt', 'r')
+    input_file = open('input-10000nodes-fullyconnected.txt', 'r')
 
     g = nx.Graph()
     vals = input_file.readline().split()
@@ -76,7 +77,7 @@ def adams_solution():
 
     ordered.sort(key=lambda s: len(s[1]), reverse=True)
 
-    node_num = len(g.nodes()) / 2
+    node_num = len(g.nodes())
 
     for i in range(0, node_num):
         check.append(ordered[i][0])
@@ -90,7 +91,6 @@ def adams_solution():
 
     print '\n'
     print 'max crossing edges:', max_count
-    difference = []
     input_file.close()
 
 
