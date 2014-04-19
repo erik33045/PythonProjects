@@ -2,6 +2,8 @@ import networkx as nx
 import random
 #import matplotlib.pyplot as plt
 import datetime
+import random
+import copy
 
 
 #randomization is a good factor to emply
@@ -114,6 +116,95 @@ def adams_solution(input_filename):
     print "\n"
 
     input_file.close() # close the file
+
+
+def random_cut(input_filename, run_time):
+
+    start_time = datetime.datetime.now();
+    elapsed_time_seconds = 0
+
+    g = nx.Graph()
+
+    input_file = open(input_filename, 'r')
+    output_file = open("Tran.txt", 'wb')
+
+    line = input_file.readline().split()
+    number_of_nodes, number_of_edges = int(line[0]), int(line[1])
+
+    node_dictionary = {}
+    edge_list = []
+    node_list = []
+
+    final_cross_count = 0
+    final_first_group = []
+    final_second_group = []
+
+    for node in range(number_of_nodes):
+        node_dictionary[node+1] = str(node+1)
+
+    for edge in range(number_of_edges):
+        line = input_file.readline().split()
+        edge_tuple = (int(line[0]), int(line[1]))
+        edge_list.append(edge_tuple)
+
+    g.add_nodes_from(list(node_dictionary), group = 1)
+    g.add_edges_from(edge_list)
+
+    node_list = g.nodes()
+
+
+    while(elapsed_time_seconds < run_time):
+        #set group attribute of random number of nodes to group 2
+        num_choose = random.randint(0,number_of_nodes)
+        for i in range(num_choose):
+            change_node = random.randint(1,number_of_nodes)
+            g.node[change_node]["group"]= 2
+
+        first_group = []
+        second_group = []
+        crossing_edges = 0
+
+        for x in node_list:
+            if(g.node[x]["group"] == 1):
+                first_group.append(x)
+            else:
+                second_group.append(x)
+
+        for x in first_group:
+            for neighbor in g[x].keys():
+                if(g.node[neighbor]["group"] == 2 ):
+                    crossing_edges += 1
+
+
+        if (crossing_edges > final_cross_count):
+            final_cross_count = crossing_edges
+            final_first_group = first_group[:]
+            final_second_group = second_group[:]
+
+        #reset group settings
+        for x in node_list:
+            g.node[x]["group"] = 1
+
+        elapsed_time = datetime.datetime.now() - start_time
+        elapsed_time_seconds = elapsed_time.seconds
+
+
+    elapsed_time = datetime.datetime.now() - start_time
+    print elapsed_time.microseconds*10^3
+
+    print final_cross_count
+
+    for x in final_first_group:
+        print x,
+
+    print
+
+    for x in final_second_group:
+        print x,
+
+
+
+
 
 if __name__ == "__main__":
     algorithms_final_project()
