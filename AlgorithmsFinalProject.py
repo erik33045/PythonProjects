@@ -41,6 +41,10 @@ def graph_generator(number_of_nodes, connectedness_of_graph, name_of_test_file):
             output_file.write(str(node) + " " + str(edge) + "\n")
 
 
+def total_time_in_milliseconds(elapsed_time):
+    return (float(elapsed_time.seconds) * float(1000)) + (float(elapsed_time.microseconds) / float(1000))
+
+
 def rank_and_prune(input_file, output_file):
     start_time = datetime.datetime.now()
     # create the graph for edge/node storage
@@ -95,7 +99,7 @@ def rank_and_prune(input_file, output_file):
 
     elapsed_time = datetime.datetime.now() - start_time
 
-    output_file.write(str(float(elapsed_time.microseconds) / float(1000)) + "\n")
+    output_file.write(str(total_time_in_milliseconds(elapsed_time)) + "\n")
     output_file.write(str(max_count) + "\n")
 
     #write all entries in the first group seperated by spaces excluding the last entry
@@ -107,7 +111,6 @@ def rank_and_prune(input_file, output_file):
     [output_file.write(str(n) + " ") for n in second_group[0:-1]]
     #write the last entry with a new line
     output_file.write(str(second_group[-1]) + '\n')
-
 
 def random_cut(input_file, output_file, seconds_to_run):
 
@@ -174,7 +177,7 @@ def random_cut(input_file, output_file, seconds_to_run):
 
     elapsed_time = datetime.datetime.now() - start_time
 
-    output_file.write(str(float(elapsed_time.microseconds) / float(1000)) + '\n')
+    output_file.write(str(total_time_in_milliseconds(elapsed_time)) + '\n')
     output_file.write(str(final_cross_count) + '\n')
 
     #write all entries in the first group seperated by spaces excluding the last entry
