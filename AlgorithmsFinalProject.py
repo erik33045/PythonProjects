@@ -67,13 +67,18 @@ def rank_and_prune(input_file, output_file):
         u = edge[0]
         v = edge[1]
         g.add_edge(u, v)
-
+        
+    # add each node to ensure it's there
+    for i in range(1, int(vals[0])+1):
+        g.add_node(i)
+        
     # place all the nodes and their neighbors into the neighbors list
     for i in range(1, len(g.nodes())+1):
         neighbors.append([i, g[i].keys()])
 
     # the number of nodes to check (default to all of them)
-    node_num = len(g.nodes())
+    node_num = int(vals[0]) # set to the total number of nodes
+    random.shuffle(neighbors) # randomize the order of the list
 
     # check nodes until you reach the cap of num_nodes
     for i in range(0, node_num):
