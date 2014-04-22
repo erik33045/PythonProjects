@@ -29,9 +29,18 @@ def algorithms_final_project():
     else:
         shutil.copyfile("output-linear.txt", "Hendrickson.txt")
 
+    input_file = open(input_file_name, 'r')
+    output_file = open("output-check.txt", 'wb')
+    check_output(input_file, output_file, "output-linear.txt")
+    input_file.close()
+    output_file.close()
+
+
     #Remove temporary output files
     os.remove("output-random.txt")
     os.remove("output-linear.txt")
+
+
 
 
 #Test function that generates a number of nodes and edges based on user inputs
@@ -227,6 +236,72 @@ def random_cut(input_file, output_file, seconds_to_run):
     output_file.write(str(final_second_group[-1]) + '\n')
 
     return final_cross_count
+
+def check_output(input_file, output_file, solution_filename):
+
+    g = nx.Graph()
+
+
+    #create graph
+    line = input_file.readline().split()
+    number_of_nodes, number_of_edges = int(line[0]), int(line[1])
+
+    node_dictionary = {}
+    edge_list = []
+
+    final_cross_count = 0
+    final_first_group = []
+    final_second_group = []
+
+    for node in range(number_of_nodes):
+        node_dictionary[node+1] = str(node+1)
+
+    for edge in range(number_of_edges):
+        line = input_file.readline().split()
+        edge_tuple = (int(line[0]), int(line[1]))
+        edge_list.append(edge_tuple)
+
+    g.add_nodes_from(list(node_dictionary), group= -1)
+    g.add_edges_from(edge_list)
+
+    node_list = g.nodes()
+
+    #get output groups
+
+    solution_file = open(solution_filename, 'r')
+    solution_file.readline() # eat time
+    reported_crossing_edges = int(solution_file.readline()) #get reported edges
+
+    group_1 = map(int, solution_file.readline().split())
+    group_2 = map(int, solution_file.readline().split())
+
+    for g1_vertex in group_1:
+        g.node[g1_vertex]["group"] = 1
+
+    for g2_vertex in group_2:
+        g.node[g2_vertex]["group"] = 2
+
+    for n in node_list:
+        if g.node[n]["group"]==-1:
+            output_file.write("All nodes not included in groups! Bad solution!\n")
+            return
+
+    crossing_edges = 0
+
+    for vertex in group_1:
+        for neighbor in g[vertex].keys():
+            if g.node[neighbor]["group"] == 2:
+                crossing_edges += 1
+
+    if crossing_edges == reported_crossing_edges:
+        output_file.write("This is a correct solution. Hooray!")
+    elif crossing_edges > reported_crossing_edges:
+        output_file.write("Not all crossing edges reported. \n")
+    else:
+        output_file.write("More crossing edges reported than there exist. EPIC FAILURE\n")
+
+    solution_file.close()
+    return
 
 #This is to be able to run the file through command line
 if __name__ == "__main__":
