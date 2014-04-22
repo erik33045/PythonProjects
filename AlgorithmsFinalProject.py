@@ -1,6 +1,8 @@
+import os
 import networkx as nx
 import datetime
 import random
+import shutil
 
 
 def algorithms_final_project():
@@ -8,15 +10,23 @@ def algorithms_final_project():
 
     input_file = open(input_file_name, 'r')
     output_file = open("output-rank.txt", 'wb')
-    rank_and_prune(input_file, output_file)
+    rank_found_edges = rank_and_prune(input_file, output_file)
     input_file.close()
     output_file.close()
 
     input_file = open(input_file_name, 'r')
     output_file = open("output-random.txt", 'wb')
-    random_cut(input_file, output_file, 20)
+    random_found_edges = random_cut(input_file, output_file, 20)
     input_file.close()
     output_file.close()
+
+    if random_found_edges > rank_found_edges:
+        shutil.copyfile("output-random.txt", "Hendrickson.txt")
+    else:
+        shutil.copyfile("output-rank.txt", "Hendrickson.txt")
+
+    os.remove("output-random.txt")
+    os.remove("output-rank.txt")
 
 
 def graph_generator(number_of_nodes, connectedness_of_graph, name_of_test_file):
@@ -77,8 +87,10 @@ def rank_and_prune(input_file, output_file):
         neighbors.append([i, g[i].keys()])
 
     # the number of nodes to check (default to all of them)
-    node_num = int(vals[0]) # set to the total number of nodes
-    random.shuffle(neighbors) # randomize the order of the list
+    # set to the total number of nodes
+    node_num = int(vals[0])
+    # randomize the order of the list
+    random.shuffle(neighbors)
 
     # check nodes until you reach the cap of num_nodes
     for i in range(0, node_num):
@@ -116,6 +128,9 @@ def rank_and_prune(input_file, output_file):
     [output_file.write(str(n) + " ") for n in second_group[0:-1]]
     #write the last entry with a new line
     output_file.write(str(second_group[-1]) + '\n')
+
+    return max_count
+
 
 def random_cut(input_file, output_file, seconds_to_run):
 
@@ -195,6 +210,7 @@ def random_cut(input_file, output_file, seconds_to_run):
     #write the last entry with a new line
     output_file.write(str(final_second_group[-1]) + '\n')
 
+    return final_cross_count
 
 if __name__ == "__main__":
     algorithms_final_project()
