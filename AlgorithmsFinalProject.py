@@ -5,45 +5,58 @@ import random
 import shutil
 
 
+#Main function
 def algorithms_final_project():
     input_file_name = "input.txt"
 
+    #Perform the linear maximization algorithm
     input_file = open(input_file_name, 'r')
-    output_file = open("output-rank.txt", 'wb')
-    rank_found_edges = rank_and_prune(input_file, output_file)
+    output_file = open("output-linear.txt", 'wb')
+    linear_found_edges = linear_maximization(input_file, output_file)
     input_file.close()
     output_file.close()
 
+    #Perform the random cut algorithm
     input_file = open(input_file_name, 'r')
     output_file = open("output-random.txt", 'wb')
     random_found_edges = random_cut(input_file, output_file, 20)
     input_file.close()
     output_file.close()
 
-    if random_found_edges > rank_found_edges:
+    #Check which algorithm had the most number of found edges and copy that to the final output file
+    if random_found_edges > linear_found_edges:
         shutil.copyfile("output-random.txt", "Hendrickson.txt")
     else:
-        shutil.copyfile("output-rank.txt", "Hendrickson.txt")
+        shutil.copyfile("output-linear.txt", "Hendrickson.txt")
 
+    #Remove temporary output files
     os.remove("output-random.txt")
-    os.remove("output-rank.txt")
+    os.remove("output-linear.txt")
 
 
+#Test function that generates a number of nodes and edges based on user inputs
 def graph_generator(number_of_nodes, connectedness_of_graph, name_of_test_file):
+    #How connected the graph is, percentage 0-100
     connectedness_ratio = float(connectedness_of_graph / float(100))
+    #This is how we know how many edges to add to each node
     number_of_edges_per_node = int(number_of_nodes * connectedness_ratio)
 
+    #this is the output file to write to
     output_file = open(name_of_test_file, 'wb')
 
     total_number_of_edges = 0
+
+    #for loop to calculate the total number of edges
     for node in range(1, number_of_nodes+1):
         for edge in range(1, number_of_edges_per_node+1):
             if edge == node:
                 continue
             total_number_of_edges += 1
 
+    #Write the number of nodes and edges
     output_file.write(str(number_of_nodes) + " " + str(total_number_of_edges) + "\n")
 
+    #write out each edge
     for node in range(1, number_of_nodes+1):
         for edge in range(1, number_of_edges_per_node+1):
             if edge == node:
@@ -51,11 +64,14 @@ def graph_generator(number_of_nodes, connectedness_of_graph, name_of_test_file):
             output_file.write(str(node) + " " + str(edge) + "\n")
 
 
+#This function counts the total number of elapsed milliseconds and returns them
 def total_time_in_milliseconds(elapsed_time):
     return (float(elapsed_time.seconds) * float(1000)) + (float(elapsed_time.microseconds) / float(1000))
 
 
-def rank_and_prune(input_file, output_file):
+#This Algorithm will go through each node and attempt to add it to group a, and check if going from B to A increases
+#the number of crossing edges
+def linear_maximization(input_file, output_file):
     start_time = datetime.datetime.now()
     # create the graph for edge/node storage
     g = nx.Graph()
@@ -212,5 +228,6 @@ def random_cut(input_file, output_file, seconds_to_run):
 
     return final_cross_count
 
+#This is to be able to run the file through command line
 if __name__ == "__main__":
     algorithms_final_project()
