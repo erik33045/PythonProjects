@@ -7,7 +7,7 @@ import shutil
 
 #Main function
 def algorithms_final_project():
-    input_file_name = "input.txt"
+    input_file_name = "input_20knodes_100kedges"
 
     #Perform the linear maximization algorithm
     input_file = open(input_file_name, 'r')
@@ -19,7 +19,7 @@ def algorithms_final_project():
     #Perform the random cut algorithm
     input_file = open(input_file_name, 'r')
     output_file = open("output-random.txt", 'wb')
-    random_found_edges = random_cut(input_file, output_file, 20)
+    random_found_edges = random_cut(input_file, output_file, 10)
     input_file.close()
     output_file.close()
 
@@ -37,8 +37,8 @@ def algorithms_final_project():
 
 
     #Remove temporary output files
-    os.remove("output-random.txt")
-    os.remove("output-linear.txt")
+    #os.remove("output-random.txt")
+    #os.remove("output-linear.txt")
 
 
 
@@ -158,7 +158,9 @@ def linear_maximization(input_file, output_file):
 
 
 def random_cut(input_file, output_file, seconds_to_run):
+    '''randomly splits graph nodes into 2 groups and reports the number of crossing edges between them '''
 
+    # mark start_time
     start_time = datetime.datetime.now()
     elapsed_time_seconds = 0
 
@@ -175,15 +177,12 @@ def random_cut(input_file, output_file, seconds_to_run):
     final_second_group = []
 
     for node in range(number_of_nodes):
-        node_dictionary[node+1] = str(node+1)
+        g.add_node(node+1, group=1)
 
     for edge in range(number_of_edges):
         line = input_file.readline().split()
-        edge_tuple = (int(line[0]), int(line[1]))
-        edge_list.append(edge_tuple)
+        g.add_edge(int(line[0]), int(line[1]))
 
-    g.add_nodes_from(list(node_dictionary), group=1)
-    g.add_edges_from(edge_list)
 
     node_list = g.nodes()
 
@@ -296,7 +295,7 @@ def check_output(input_file, output_file, solution_filename):
     if crossing_edges == reported_crossing_edges:
         output_file.write("This is a correct solution. Hooray!")
     elif crossing_edges > reported_crossing_edges:
-        output_file.write("Not all crossing edges reported. \n")
+        output_file.write("{}{}{}".format("Not all crossing edges reported. It should be ", crossing_edges, "\n"))
     else:
         output_file.write("More crossing edges reported than there exist. EPIC FAILURE\n")
 
