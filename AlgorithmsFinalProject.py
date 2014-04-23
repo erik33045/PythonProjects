@@ -7,34 +7,66 @@ import shutil
 
 #Main function
 def algorithms_final_project():
-    input_file_name = "input-10000nodes-noedges.txt"
+
+    start_time = datetime.datetime.now()
+    input_file_name = "input.txt"
+    input_file = open(input_file_name, 'r')
+
+    # parse input into graph
+    G = nx.Graph()
+
+    # get number of nodes and edges
+    line = input_file.readline().split()
+    number_of_nodes, number_of_edges = int(line[0]), int(line[1])
+
+    # add each node to graph
+    # Time Complexity: O(m)*time_to_add_node
+    for node in range(number_of_nodes):
+        G.add_node(node+1, group=1)
+
+    # read in each line and add the corresponding edge to the graph, g
+    # Time Complexity: O(m)*time_to_add_edge
+    for edge in range(number_of_edges):
+        line = input_file.readline().split()
+        G.add_edge(int(line[0]), int(line[1]))
+
+    input_file.close()
+
 
     #Perform the linear maximization algorithm
-    input_file = open(input_file_name, 'r')
     output_file = open("output-linear.txt", 'wb')
-    linear_found_edges = linear_maximization(input_file, output_file)
-    input_file.close()
+    linear_found_edges = linear_maximization(output_file, G, number_of_nodes)
     output_file.close()
-    '''
+
     #Perform the random cut algorithm
-    input_file = open(input_file_name, 'r')
     output_file = open("output-random.txt", 'wb')
-    random_found_edges = random_cut(input_file, output_file, 10)
-    input_file.close()
+    random_found_edges = random_cut(output_file, G, number_of_nodes, 10)
     output_file.close()
+
+    output_file = open("output-check.txt", 'wb')
+    check_output(output_file, G, number_of_nodes, "output-linear.txt")
+    output_file.close()
+
+    elapsed_time = datetime.datetime.now() - start_time
+    output_file = open("Hendrickson.txt", 'wb')
+    output_file.write(str(total_time_in_milliseconds(elapsed_time)) + "\n")
+    output_file.close()
+
+    output_file = open("Hendrickson.txt", 'a')
 
     #Check which algorithm had the most number of found edges and copy that to the final output file
     if random_found_edges > linear_found_edges:
-        shutil.copyfile("output-random.txt", "Hendrickson.txt")
+        input_file = open("output-random.txt", 'r')
     else:
-        shutil.copyfile("output-linear.txt", "Hendrickson.txt")
+        input_file = open("output-linear.txt", 'r')
 
-    '''
-    input_file = open(input_file_name, 'r')
-    output_file = open("output-check.txt", 'wb')
-    check_output(input_file, output_file, "output-linear.txt")
+    for line in input_file:
+            output_file.write(line)
+
     input_file.close()
     output_file.close()
+
+
 
 
     #Remove temporary output files
@@ -81,14 +113,8 @@ def total_time_in_milliseconds(elapsed_time):
 
 #This Algorithm will go through each node and attempt to add it to group a, and check if going from B to A increases
 #the number of crossing edges
-def linear_maximization(input_file, output_file):
+def linear_maximization(output_file, g, number_of_nodes):
     start_time = datetime.datetime.now()
-    # create the graph for edge/node storage
-    g = nx.Graph()
-    # grab the first two values nodes/edges
-    vals = input_file.readline().split()
-    number_of_nodes = int(vals[0])
-    number_of_edges = int(vals[1])
 
     #initialize current crossing edge count to 0
     max_count = 0
@@ -96,22 +122,11 @@ def linear_maximization(input_file, output_file):
     # a list of the nodes to be shuffled
 
     nodes = []
-
     #list to contain 1 group of nodes
     first_group = []
     # a second list used to form a second_group
     second_group = []
 
-    # read in each line and add the corresponding edge to the graph, g
-    # Time Complexity: O(m)*time_to_add_edge
-    for i in range(number_of_edges):
-        edge = input_file.readline().split()
-        g.add_edge(int(edge[0]), int(edge[1]))
-        
-    # add each node to graph
-    # Time Complexity: O(m)*time_to_add_node
-    for i in range(1, number_of_nodes+1):
-        g.add_node(i)
         
     # place all the nodes into list to be shuffled and initialize the group 1 list to contain all nodes
     # Time Complexity: O(n)
@@ -147,13 +162,13 @@ def linear_maximization(input_file, output_file):
             #append node from first group
             second_group.append(current_node)
             #remove node from first group
-            del first_group[current_node-1]
+            first_group.remove(current_node)
         # if this new configuration isn't better than the best...
 
 
     elapsed_time = datetime.datetime.now() - start_time
 
-    output_file.write(str(total_time_in_milliseconds(elapsed_time)) + "\n")
+    #output_file.write(str(total_time_in_milliseconds(elapsed_time)) + "\n")
     output_file.write(str(max_count) + "\n")
 
     #write all entries in the first group seperated by spaces excluding the last entry
@@ -169,7 +184,7 @@ def linear_maximization(input_file, output_file):
     return max_count
 
 
-def random_cut(input_file, output_file, seconds_to_run):
+def random_cut(output_file, g, number_of_nodes, seconds_to_run):
     """
     randomly splits graph nodes into 2 groups and reports the number of crossing edges between them
     """
@@ -178,22 +193,14 @@ def random_cut(input_file, output_file, seconds_to_run):
     start_time = datetime.datetime.now()
     elapsed_time_seconds = 0
 
-    g = nx.Graph()
-
-    line = input_file.readline().split()
-    number_of_nodes, number_of_edges = int(line[0]), int(line[1])
-
     final_cross_count = 0
     final_first_group = []
+
+    #initialize first group to contain all nodes
+    for i in range(number_of_nodes):
+        final_first_group.append(i+1)
+
     final_second_group = []
-
-    for node in range(number_of_nodes):
-        g.add_node(node+1, group=1)
-
-    for edge in range(number_of_edges):
-        line = input_file.readline().split()
-        g.add_edge(int(line[0]), int(line[1]))
-
 
     node_list = g.nodes()
 
@@ -232,54 +239,28 @@ def random_cut(input_file, output_file, seconds_to_run):
 
     elapsed_time = datetime.datetime.now() - start_time
 
-    output_file.write(str(total_time_in_milliseconds(elapsed_time)) + '\n')
+    #output_file.write(str(total_time_in_milliseconds(elapsed_time)) + '\n')
     output_file.write(str(final_cross_count) + '\n')
 
     #write all entries in the first group seperated by spaces excluding the last entry
-    [output_file.write(str(n) + " ") for n in final_first_group[0:-1]]
+    [output_file.write(str(n) + " ") for n in final_first_group]
     #write the last entry with a new line
-    output_file.write(str(final_first_group[-1]) + '\n')
+    output_file.write('\n')
 
     #write all entries in the second group seperated by spaces excluding the last entry
-    [output_file.write(str(n) + " ") for n in final_second_group[0:-1]]
+    [output_file.write(str(n) + " ") for n in final_second_group]
     #write the last entry with a new line
-    output_file.write(str(final_second_group[-1]) + '\n')
+    output_file.write('\n')
 
     return final_cross_count
 
-def check_output(input_file, output_file, solution_filename):
-
-    g = nx.Graph()
-
-
-    #create graph
-    line = input_file.readline().split()
-    number_of_nodes, number_of_edges = int(line[0]), int(line[1])
-
-    node_dictionary = {}
-    edge_list = []
-
-    final_cross_count = 0
-    final_first_group = []
-    final_second_group = []
-
-    for node in range(number_of_nodes):
-        node_dictionary[node+1] = str(node+1)
-
-    for edge in range(number_of_edges):
-        line = input_file.readline().split()
-        edge_tuple = (int(line[0]), int(line[1]))
-        edge_list.append(edge_tuple)
-
-    g.add_nodes_from(list(node_dictionary), group= -1)
-    g.add_edges_from(edge_list)
+def check_output(output_file, g, number_of_nodes,  solution_filename):
 
     node_list = g.nodes()
 
     #get output groups
-
     solution_file = open(solution_filename, 'r')
-    solution_file.readline() # eat time
+    #solution_file.readline() # eat time
     reported_crossing_edges = int(solution_file.readline()) #get reported edges
 
     group_1 = map(int, solution_file.readline().split())
