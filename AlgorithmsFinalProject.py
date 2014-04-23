@@ -43,6 +43,7 @@ def algorithms_final_project():
     random_found_edges = random_cut(output_file, G, number_of_nodes, 10)
     output_file.close()
 
+
     output_file = open("output-check.txt", 'wb')
     check_output(output_file, G, number_of_nodes, "output-linear.txt")
     output_file.close()
@@ -195,37 +196,42 @@ def random_cut(output_file, g, number_of_nodes, seconds_to_run):
 
     final_cross_count = 0
     final_first_group = []
+    final_second_group = []
 
     #initialize first group to contain all nodes
     for i in range(number_of_nodes):
         final_first_group.append(i+1)
 
-    final_second_group = []
-
     node_list = g.nodes()
 
+    #keep searching for best solution until end of given runtime
     while elapsed_time_seconds < seconds_to_run:
+
         #set group attribute of random number of nodes to group 2
         num_choose = random.randint(0, number_of_nodes)
         for i in range(num_choose):
             change_node = random.randint(1, number_of_nodes)
             g.node[change_node]["group"] = 2
 
+        #initialize group lists
         first_group = []
         second_group = []
         crossing_edges = 0
 
+        #append nodes to appropriate lists
         for x in node_list:
             if g.node[x]["group"] == 1:
                 first_group.append(x)
             else:
                 second_group.append(x)
 
+        #if a neighbor of a node in the first_group is not in group 1 as well it is a cross edge and we increment
         for x in first_group:
             for neighbor in g[x].keys():
                 if g.node[neighbor]["group"] == 2:
                     crossing_edges += 1
 
+        # we keep the groups if the cross edge total is improved
         if crossing_edges > final_cross_count:
             final_cross_count = crossing_edges
             final_first_group = first_group[:]
@@ -260,18 +266,26 @@ def check_output(output_file, g, number_of_nodes,  solution_filename):
 
     #get output groups
     solution_file = open(solution_filename, 'r')
-    #solution_file.readline() # eat time
+
     reported_crossing_edges = int(solution_file.readline()) #get reported edges
 
+    # create node group lists
     group_1 = map(int, solution_file.readline().split())
     group_2 = map(int, solution_file.readline().split())
 
+
+    #reset group attributes
+    for node in node_list:
+        g.node[node]["group"]=-1
+
+    # set group attributes depending on the group
     for g1_vertex in group_1:
         g.node[g1_vertex]["group"] = 1
 
     for g2_vertex in group_2:
         g.node[g2_vertex]["group"] = 2
 
+    # check to make sure all nodes are properly labeled
     for n in node_list:
         if g.node[n]["group"]==-1:
             output_file.write("All nodes not included in groups! Bad solution!\n")
@@ -279,6 +293,7 @@ def check_output(output_file, g, number_of_nodes,  solution_filename):
 
     crossing_edges = 0
 
+    #count crossing edges
     for vertex in group_1:
         for neighbor in g[vertex].keys():
             if g.node[neighbor]["group"] == 2:
