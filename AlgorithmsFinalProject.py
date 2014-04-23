@@ -129,7 +129,7 @@ def linear_maximization(input_file, output_file):
         # append these crossing_edges to the count of crossing edges
         count += crossing_edges
         # if the current configuration is better than the previous best...
-        if count > max_count:
+        if count >= max_count:
             # set this new max value
             max_count = count
         # if this new configuration isn't better than the best...
