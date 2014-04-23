@@ -7,7 +7,7 @@ import shutil
 
 #Main function
 def algorithms_final_project():
-    input_file_name = "input.txt"
+    input_file_name = "input-10000nodes-noedges.txt"
 
     #Perform the linear maximization algorithm
     input_file = open(input_file_name, 'r')
@@ -15,7 +15,7 @@ def algorithms_final_project():
     linear_found_edges = linear_maximization(input_file, output_file)
     input_file.close()
     output_file.close()
-
+    '''
     #Perform the random cut algorithm
     input_file = open(input_file_name, 'r')
     output_file = open("output-random.txt", 'wb')
@@ -29,6 +29,7 @@ def algorithms_final_project():
     else:
         shutil.copyfile("output-linear.txt", "Hendrickson.txt")
 
+    '''
     input_file = open(input_file_name, 'r')
     output_file = open("output-check.txt", 'wb')
     check_output(input_file, output_file, "output-linear.txt")
@@ -86,58 +87,69 @@ def linear_maximization(input_file, output_file):
     g = nx.Graph()
     # grab the first two values nodes/edges
     vals = input_file.readline().split()
+    number_of_nodes = int(vals[0])
+    number_of_edges = int(vals[1])
 
-    # check the count of the current grouping and set the cap for the max count encountered
-    count = max_count = 0
-    # a list of the nodes with their number of neighbors
-    neighbors = []
+    #initialize current crossing edge count to 0
+    max_count = 0
+
+    # a list of the nodes to be shuffled
+
+    nodes = []
+
+    #list to contain 1 group of nodes
     first_group = []
     # a second list used to form a second_group
     second_group = []
 
     # read in each line and add the corresponding edge to the graph, g
-    for i in range(1, int(vals[1])+1):
+    # Time Complexity: O(m)*time_to_add_edge
+    for i in range(number_of_edges):
         edge = input_file.readline().split()
-        edge = map(int, edge)
-        u = edge[0]
-        v = edge[1]
-        g.add_edge(u, v)
+        g.add_edge(int(edge[0]), int(edge[1]))
         
-    # add each node to ensure it's there
-    for i in range(1, int(vals[0])+1):
+    # add each node to graph
+    # Time Complexity: O(m)*time_to_add_node
+    for i in range(1, number_of_nodes+1):
         g.add_node(i)
         
-    # place all the nodes and their neighbors into the neighbors list
-    for i in range(1, len(g.nodes())+1):
-        neighbors.append([i, g[i].keys()])
+    # place all the nodes into list to be shuffled and initialize the group 1 list to contain all nodes
+    # Time Complexity: O(n)
+    for i in range(1, number_of_nodes+1):
+        nodes.append(i)
+        first_group.append(i)
 
-    # the number of nodes to check (default to all of them)
-    # set to the total number of nodes
-    node_num = int(vals[0])
-    # randomize the order of the list
-    random.shuffle(neighbors)
 
-    # check nodes until you reach the cap of num_nodes
-    for i in range(0, node_num):
-        # place the next node into the second group
-        second_group.append(neighbors[i][0])
-        # create a reference to the last node put into the second group
-        last_node = second_group[-1]
-        # set crossing_edges to the number of neighbors the most recently added node has
-        # and remove any connections to nodes already in the group
-        crossing_edges = len(g.neighbors(last_node)) - (len(set(g.neighbors(last_node)).intersection(second_group))) * 2
-        # append these crossing_edges to the count of crossing edges
-        count += crossing_edges
-        # if the current configuration is better than the previous best...
-        if count >= max_count:
-            # set this new max value
-            max_count = count
+    random.shuffle(nodes)
+
+
+    # for all nodes
+    # Time Complexity: O(mn)
+    for i in range(number_of_nodes):
+        # get node to be examined
+        current_node = nodes[i]
+
+        # get set of neighbors
+        # Time complexity: O(m)
+        node_neighbors = g.neighbors(current_node)
+        node_neighbors_set = set(node_neighbors)
+
+        # determine amount of edges that are and are not currently crossing between groups
+        current_non_cross_edges = len(node_neighbors_set.intersection(first_group))
+        current_cross_edges = len(node_neighbors) - current_non_cross_edges
+
+        # determine the net difference of crossing edges if the node is moved to group 2
+        net_cross_edges_after_switch = current_non_cross_edges - current_cross_edges
+
+        # if there will be a positive addition of edges after the switch then add them to the edge count
+        if net_cross_edges_after_switch > 0:
+            max_count += net_cross_edges_after_switch
+            #append node from first group
+            second_group.append(current_node)
+            #remove node from first group
+            del first_group[current_node-1]
         # if this new configuration isn't better than the best...
-        elif count < max_count:
-            # remove the most recently added node and keep going
-            del second_group[-1]
-            #append to first_group
-            first_group.append(neighbors[i][0])
+
 
     elapsed_time = datetime.datetime.now() - start_time
 
@@ -145,20 +157,22 @@ def linear_maximization(input_file, output_file):
     output_file.write(str(max_count) + "\n")
 
     #write all entries in the first group seperated by spaces excluding the last entry
-    [output_file.write(str(n) + " ") for n in first_group[0:-1]]
+    [output_file.write(str(n) + " ") for n in first_group]
     #write the last entry with a new line
-    output_file.write(str(first_group[-1]) + '\n')
+    output_file.write('\n')
 
     #write all entries in the second group seperated by spaces excluding the last entry
-    [output_file.write(str(n) + " ") for n in second_group[0:-1]]
+    [output_file.write(str(n) + " ") for n in second_group]
     #write the last entry with a new line
-    output_file.write(str(second_group[-1]) + '\n')
+    output_file.write('\n')
 
     return max_count
 
 
 def random_cut(input_file, output_file, seconds_to_run):
-    '''randomly splits graph nodes into 2 groups and reports the number of crossing edges between them '''
+    """
+    randomly splits graph nodes into 2 groups and reports the number of crossing edges between them
+    """
 
     # mark start_time
     start_time = datetime.datetime.now()
@@ -168,9 +182,6 @@ def random_cut(input_file, output_file, seconds_to_run):
 
     line = input_file.readline().split()
     number_of_nodes, number_of_edges = int(line[0]), int(line[1])
-
-    node_dictionary = {}
-    edge_list = []
 
     final_cross_count = 0
     final_first_group = []
@@ -295,7 +306,7 @@ def check_output(input_file, output_file, solution_filename):
     if crossing_edges == reported_crossing_edges:
         output_file.write("This is a correct solution. Hooray!")
     elif crossing_edges > reported_crossing_edges:
-        output_file.write("{}{}{}".format("Not all crossing edges reported. It should be ", crossing_edges, "\n"))
+        output_file.write("Not all crossing edges reported. It should be "+ str(crossing_edges) +"\n")
     else:
         output_file.write("More crossing edges reported than there exist. EPIC FAILURE\n")
 
