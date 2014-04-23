@@ -7,7 +7,7 @@ import shutil
 
 #Main function
 def algorithms_final_project():
-    input_file_name = "input_20knodes_100kedges"
+    input_file_name = "input.txt"
 
     #Perform the linear maximization algorithm
     input_file = open(input_file_name, 'r')
